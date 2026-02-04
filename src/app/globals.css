@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --beat-purple: #6b47d8;
+  --beat-purple-deep: #4b2fb7;
+  --beat-cream: #f8f5ef;
+  --beat-ink: #1f1f24;
+  --beat-ink-soft: #4b4a55;
+  --beat-accent: #ff5ea8;
+  --beat-blue: #5aa8ff;
+}
+
+@theme inline {
+  --color-background: var(--beat-cream);
+  --color-foreground: var(--beat-ink);
+  --font-sans: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-x: clip;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--beat-cream);
+  color: var(--beat-ink);
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+  width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: rgba(255, 94, 168, 0.25);
+}
+
+.gradient-hero {
+  background: radial-gradient(circle at top, #7a55f0 0%, #6b47d8 48%, #4b2fb7 100%);
+}
+
+.card-glow {
+  box-shadow: 0 40px 120px rgba(20, 16, 45, 0.35);
+}
