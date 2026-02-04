@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Baloo_2, Poppins } from "next/font/google";
 import "./globals.css";
 import PageTransition from "@/components/PageTransition";
+import { Analytics } from "@vercel/analytics/next"
 
 const displayFont = Baloo_2({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
         <PageTransition>{children}</PageTransition>
+        <Analytics />
       </body>
     </html>
   );
