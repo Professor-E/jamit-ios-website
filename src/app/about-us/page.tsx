@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DownloadIcon from "@/components/DownloadIcon";
 
 const APP_STORE_URL = "https://www.apple.com/app-store/";
@@ -14,8 +14,8 @@ const teamMembers = [
     bio: "Avid soccer player and double-major in math and computer science & engineering. LOVES his goldendoodle named Pola!",
     photo: "/assets/Jan.png",
     photoPosition: "50% -15%",
-    photoScale: 1.25,
-    photoShiftY: 0,
+    photoScale: 1.5,
+    photoShiftY: 5,
     links: {
       github: "https://github.com/janszmajda",
       linkedin: "https://www.linkedin.com/in/janszmajda/",
@@ -28,8 +28,8 @@ const teamMembers = [
     bio: "Double majoring in electrical engineering and computer science and finance. Takes ANY opportunity to go skiing!",
     photo: "/assets/Dom.png",
     photoPosition: "50% 35%",
-    photoScale: 1.25,
-    photoShiftY: -8,
+    photoScale: 1.3,
+    photoShiftY: -10,
     links: {
       github: "https://github.com/Professor-E",
       linkedin: "https://www.linkedin.com/in/dominik-grzeszczak-184982285/",
@@ -40,10 +40,10 @@ const teamMembers = [
     name: "Breck Massey",
     role: "Developer",
     bio: "Majoring in electrical engineering and computer science. ALWAYS active in the gym and playing spikeball!",
-    photo: "/assets/Breck.JPG",
-    photoPosition: "80% 35%",
-    photoScale: 1.35,
-    photoShiftY: -10,
+    photo: "/assets/Breck.jpeg",
+    photoPosition: "50% 50%",
+    photoScale: 1.3,
+    photoShiftY: 18,
     links: {
       github: "https://github.com/BreckMasseyMain",
       linkedin: "https://www.linkedin.com/in/breckcmassey/",
@@ -53,11 +53,15 @@ const teamMembers = [
 ];
 
 export default function AboutUsPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
   }, []);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-[color:var(--beat-cream)] text-[color:var(--beat-ink)]">
@@ -103,16 +107,72 @@ export default function AboutUsPage() {
               Download App
             </Link>
 
-            <Link
-              href={APP_STORE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30 md:hidden"
-            >
-              <DownloadIcon className="h-4 w-4" />
-              Download App
-            </Link>
+            <div className="flex items-center gap-2 md:hidden">
+              <Link
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30"
+              >
+                <DownloadIcon className="h-4 w-4" />
+                Download App
+              </Link>
+              <button
+                type="button"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white transition hover:bg-white/25"
+              >
+                <span className="sr-only">Toggle navigation</span>
+                <span className="flex flex-col items-center justify-center">
+                  <span
+                    className={`h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                      mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
+                    }`}
+                  />
+                  <span
+                    className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-opacity duration-200 ${
+                      mobileMenuOpen ? "opacity-0" : "opacity-100"
+                    }`}
+                  />
+                  <span
+                    className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                      mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
+                    }`}
+                  />
+                </span>
+              </button>
+            </div>
           </header>
+
+          {mobileMenuOpen && (
+            <div id="mobile-nav" className="px-6 pb-4 md:hidden">
+              <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/"
+                  onClick={closeMobileMenu}
+                >
+                  Home
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/about-us"
+                  onClick={closeMobileMenu}
+                >
+                  About Us
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/contact"
+                  onClick={closeMobileMenu}
+                >
+                  Contact
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         <main className="flex flex-1 flex-col">

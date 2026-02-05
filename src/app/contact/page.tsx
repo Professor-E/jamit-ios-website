@@ -8,6 +8,7 @@ import DownloadIcon from "@/components/DownloadIcon";
 const APP_STORE_URL = "https://www.apple.com/app-store/";
 
 export default function ContactPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formValues, setFormValues] = useState({
     name: "",
     email: "",
@@ -44,6 +45,8 @@ export default function ContactPage() {
       return;
     }
   };
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-[color:var(--beat-cream)] text-[color:var(--beat-ink)]">
@@ -89,16 +92,72 @@ export default function ContactPage() {
               Download App
             </Link>
 
-            <Link
-              href={APP_STORE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30 md:hidden"
-            >
-              <DownloadIcon className="h-4 w-4" />
-              Download App
-            </Link>
+            <div className="flex items-center gap-2 md:hidden">
+              <Link
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30"
+              >
+                <DownloadIcon className="h-4 w-4" />
+                Download App
+              </Link>
+              <button
+                type="button"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white transition hover:bg-white/25"
+              >
+                <span className="sr-only">Toggle navigation</span>
+                <span className="flex flex-col items-center justify-center">
+                  <span
+                    className={`h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                      mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
+                    }`}
+                  />
+                  <span
+                    className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-opacity duration-200 ${
+                      mobileMenuOpen ? "opacity-0" : "opacity-100"
+                    }`}
+                  />
+                  <span
+                    className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                      mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
+                    }`}
+                  />
+                </span>
+              </button>
+            </div>
           </header>
+
+          {mobileMenuOpen && (
+            <div id="mobile-nav" className="px-6 pb-4 md:hidden">
+              <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/"
+                  onClick={closeMobileMenu}
+                >
+                  Home
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/about-us"
+                  onClick={closeMobileMenu}
+                >
+                  About Us
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/contact"
+                  onClick={closeMobileMenu}
+                >
+                  Contact
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         <main className="flex flex-1 flex-col">

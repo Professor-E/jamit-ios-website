@@ -212,6 +212,7 @@ export default function Home() {
   const shouldReduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const [heroWordIndex, setHeroWordIndex] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -233,6 +234,7 @@ export default function Home() {
   const heroTextOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.75]);
   const heroArtY = useTransform(scrollYProgress, [0, 0.35], [0, 45]);
   const heroArtScale = useTransform(scrollYProgress, [0, 0.35], [1, 0.98]);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <div className="bg-[color:var(--beat-cream)] text-[color:var(--beat-ink)]">
@@ -292,19 +294,86 @@ export default function Home() {
             Download App
           </motion.a>
 
-          <motion.a
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            href={APP_STORE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30 md:hidden"
+            className="flex items-center gap-2 md:hidden"
           >
-            <DownloadIcon className="h-4 w-4" />
-            Download App
-          </motion.a>
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:shadow-black/30"
+            >
+              <DownloadIcon className="h-4 w-4" />
+              Download App
+            </a>
+            <button
+              type="button"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white transition hover:bg-white/25"
+            >
+              <span className="sr-only">Toggle navigation</span>
+              <span className="flex flex-col items-center justify-center">
+                <span
+                  className={`h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                    mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
+                  }`}
+                />
+                <span
+                  className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-opacity duration-200 ${
+                    mobileMenuOpen ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+                <span
+                  className={`mt-1 h-0.5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                    mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
+                  }`}
+                />
+              </span>
+            </button>
+          </motion.div>
         </header>
+
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              id="mobile-nav"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="relative z-20 px-6 md:hidden"
+            >
+              <div className="mt-2 rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/"
+                  onClick={closeMobileMenu}
+                >
+                  Home
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/about-us"
+                  onClick={closeMobileMenu}
+                >
+                  About Us
+                </Link>
+                <Link
+                  className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
+                  href="/contact"
+                  onClick={closeMobileMenu}
+                >
+                  Contact
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <section
           id="home"
@@ -388,7 +457,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative p-[24px]"
+              className="relative mx-auto flex w-fit items-center justify-center p-[24px]"
             >
               <motion.div
                 animate={floatSlow}
@@ -413,7 +482,7 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                className="absolute -left-16 top-8"
+                className="absolute -left-6 top-6 sm:-left-16 sm:top-8"
                 animate={floatNoteLeft}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               >
@@ -426,7 +495,7 @@ export default function Home() {
                 />
               </motion.div>
               <motion.div
-                className="absolute -right-10 bottom-4"
+                className="absolute -right-4 bottom-4 sm:-right-10"
                 animate={floatNoteRight}
                 transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
               >
