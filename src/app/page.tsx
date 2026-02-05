@@ -342,11 +342,11 @@ export default function Home() {
           {mobileMenuOpen && (
             <motion.div
               id="mobile-nav"
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="relative z-20 px-6 md:hidden"
+              initial={{ opacity: 0, height: 0, y: -8 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -8 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="relative z-20 overflow-hidden px-6 md:hidden"
             >
               <div className="mt-2 rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
@@ -377,7 +377,7 @@ export default function Home() {
 
         <section
           id="home"
-          className="relative z-10 mx-auto grid flex-1 items-center gap-16 px-6 pb-16 md:grid-cols-[1.1fr_0.9fr] md:gap-20 md:px-12"
+          className="relative z-10 mx-auto grid flex-1 items-center justify-items-center gap-16 px-6 pb-16 md:grid-cols-[1.1fr_0.9fr] md:justify-items-stretch md:gap-20 md:px-12"
         >
           <motion.div
             initial="hidden"
@@ -391,7 +391,7 @@ export default function Home() {
                 ? undefined
                 : { y: heroTextY, opacity: heroTextOpacity }
             }
-            className="md:pl-6 lg:pl-10"
+            className="w-full md:pl-6 lg:pl-10"
           >
             <motion.h1
               variants={fadeUp}
@@ -450,7 +450,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="relative flex items-center justify-center"
+            className="relative flex w-full items-center justify-center"
             style={shouldReduceMotion ? undefined : { y: heroArtY, scale: heroArtScale }}
           >
             <motion.div

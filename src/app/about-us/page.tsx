@@ -151,11 +151,11 @@ export default function AboutUsPage() {
             {mobileMenuOpen && (
               <motion.div
                 id="mobile-nav"
-                initial={{ opacity: 0, y: -10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className="px-6 pb-4 md:hidden"
+                initial={{ opacity: 0, height: 0, y: -8 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -8 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="overflow-hidden px-6 pb-4 md:hidden"
               >
                 <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
