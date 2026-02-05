@@ -27,7 +27,7 @@ const teamMembers = [
     name: "Dominik Grzeszczak",
     role: "Developer",
     bio: "Double majoring in electrical engineering and computer science and finance. Takes ANY opportunity to go skiing!",
-    photo: "/assets/Dom.jpg",
+    photo: "/assets/Dom.png",
     photoPosition: "-10% 0%",
     photoScale: 1.15,
     photoShiftY: -2,
