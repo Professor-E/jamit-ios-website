@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import DownloadIcon from "@/components/DownloadIcon";
 
 const APP_STORE_URL = "https://www.apple.com/app-store/";
@@ -131,9 +132,17 @@ export default function ContactPage() {
             </div>
           </header>
 
-          {mobileMenuOpen && (
-            <div id="mobile-nav" className="px-6 pb-4 md:hidden">
-              <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                id="mobile-nav"
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="px-6 pb-4 md:hidden"
+              >
+                <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
                   className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
                   href="/"
@@ -155,9 +164,10 @@ export default function ContactPage() {
                 >
                   Contact
                 </Link>
-              </div>
-            </div>
-          )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <main className="flex flex-1 flex-col">
