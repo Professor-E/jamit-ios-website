@@ -348,7 +348,7 @@ export default function Home() {
               transition={{ duration: 0.4, ease: "easeOut" }}
               className="relative z-20 overflow-hidden px-6 md:hidden"
             >
-              <div className="mt-2 rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+              <div className="mt-2 rounded-2xl bg-white p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
                   className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
                   href="/"
@@ -377,7 +377,7 @@ export default function Home() {
 
         <section
           id="home"
-          className="relative z-10 mx-auto grid flex-1 items-center justify-items-center gap-16 px-6 pb-16 md:grid-cols-[1.1fr_0.9fr] md:justify-items-stretch md:gap-20 md:px-12"
+          className="relative z-10 mx-auto grid flex-1 items-center justify-items-center gap-10 px-6 pb-10 sm:gap-16 sm:pb-16 md:grid-cols-[1.1fr_0.9fr] md:justify-items-stretch md:gap-20 md:px-12"
         >
           <motion.div
             initial="hidden"
@@ -399,7 +399,7 @@ export default function Home() {
             >
               Jam It!
               <span className="block text-white/90">
-                <span className="inline-flex items-baseline gap-2 whitespace-nowrap">
+                <span className="flex flex-col items-start gap-2 sm:inline-flex sm:flex-row sm:items-baseline sm:gap-2 sm:whitespace-nowrap">
                   <span>Experience the</span>
                   <span className="inline-flex h-[1.05em] w-[10ch] items-baseline justify-start overflow-hidden align-baseline">
                     <AnimatePresence mode="wait">
@@ -457,7 +457,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative mx-auto flex w-fit items-center justify-center p-[24px]"
+              className="relative mx-auto flex w-fit items-center justify-center p-[20px] sm:p-[24px]"
             >
               <motion.div
                 animate={floatSlow}
@@ -482,7 +482,7 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                className="absolute -left-6 top-6 sm:-left-16 sm:top-8"
+                className="absolute left-2 top-4 sm:-left-16 sm:top-8"
                 animate={floatNoteLeft}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               >
@@ -491,11 +491,11 @@ export default function Home() {
                   alt="Music note"
                   width={70}
                   height={70}
-                  className="opacity-90"
+                  className="h-12 w-12 opacity-90 sm:h-[70px] sm:w-[70px]"
                 />
               </motion.div>
               <motion.div
-                className="absolute -right-4 bottom-4 sm:-right-10"
+                className="absolute right-1 bottom-3 sm:-right-10 sm:bottom-4"
                 animate={floatNoteRight}
                 transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
               >
@@ -504,7 +504,7 @@ export default function Home() {
                   alt="Music note"
                   width={56}
                   height={56}
-                  className="opacity-70"
+                  className="h-10 w-10 opacity-70 sm:h-[56px] sm:w-[56px]"
                 />
               </motion.div>
             </motion.div>

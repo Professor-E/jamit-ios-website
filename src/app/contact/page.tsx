@@ -2,48 +2,142 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DownloadIcon from "@/components/DownloadIcon";
+import confetti from "canvas-confetti";
 
 const APP_STORE_URL = "https://www.apple.com/app-store/";
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+
+type FormValues = {
+  name: string;
+  email: string;
+  message: string;
+};
+
+type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 export default function ContactPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<FormValues>({
     name: "",
     email: "",
     message: "",
   });
-  const [errors, setErrors] = useState({
-    name: false,
-    email: false,
-    message: false,
-  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [formStatus, setFormStatus] = useState<{
+    state: "idle" | "submitting" | "success" | "error";
+    message: string;
+  }>({ state: "idle", message: "" });
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const isValidEmail = (value: string) => EMAIL_REGEX.test(value.trim());
+
+  const validateField = (field: keyof FormValues, value: string) => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      return `${field === "message" ? "Message" : field[0].toUpperCase()}${field.slice(
+        1
+      )} is required.`;
+    }
+    if (field === "email" && !isValidEmail(trimmedValue)) {
+      return "Enter a valid email address (gmail.com, yahoo.com, etc.).";
+    }
+    return "";
+  };
+
+  const validateForm = (values: FormValues) => {
+    const nextErrors: FormErrors = {};
+    (Object.keys(values) as Array<keyof FormValues>).forEach((field) => {
+      const error = validateField(field, values[field]);
+      if (error) {
+        nextErrors[field] = error;
+      }
+    });
+    return nextErrors;
+  };
+
+  const triggerConfetti = () => {
+    const button = submitButtonRef.current;
+    if (!button) {
+      confetti({ particleCount: 80, spread: 60, startVelocity: 22, origin: { y: 0.7 } });
+      return;
+    }
+    const rect = button.getBoundingClientRect();
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      startVelocity: 22,
+      scalar: 0.9,
+      origin: { x, y },
+    });
+  };
 
   const handleChange =
     (field: "name" | "email" | "message") =>
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const value = event.target.value;
       setFormValues((prev) => ({ ...prev, [field]: value }));
-      if (errors[field] && value.trim()) {
-        setErrors((prev) => ({ ...prev, [field]: false }));
+      if (formStatus.state !== "idle") {
+        setFormStatus({ state: "idle", message: "" });
+      }
+      if (errors[field]) {
+        const nextError = validateField(field, value);
+        setErrors((prev) => {
+          if (!nextError) {
+            const { [field]: _, ...rest } = prev;
+            return rest;
+          }
+          return { ...prev, [field]: nextError };
+        });
       }
     };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const nextErrors = {
-      name: !formValues.name.trim(),
-      email: !formValues.email.trim(),
-      message: !formValues.message.trim(),
-    };
+    const nextErrors = validateForm(formValues);
 
     setErrors(nextErrors);
 
-    if (nextErrors.name || nextErrors.email || nextErrors.message) {
-      alert("Please fill out all sections. Each section is mandatory.");
+    if (Object.keys(nextErrors).length > 0) {
+      setFormStatus({
+        state: "error",
+        message: "Please fill out all sections with valid information.",
+      });
       return;
+    }
+
+    setFormStatus({ state: "submitting", message: "Sending your message..." });
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formValues),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Unable to send your message right now.");
+      }
+
+      setFormValues({ name: "", email: "", message: "" });
+      setErrors({});
+      setFormStatus({
+        state: "success",
+        message: "Thanks! Your message has been sent.",
+      });
+      triggerConfetti();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to send your message right now.";
+      setFormStatus({ state: "error", message });
     }
   };
 
@@ -142,7 +236,7 @@ export default function ContactPage() {
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 className="overflow-hidden px-6 pb-4 md:hidden"
               >
-                <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+                <div className="rounded-2xl bg-white p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
                   className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
                   href="/"
@@ -238,52 +332,95 @@ export default function ContactPage() {
                       Name*
                     </label>
                     <input
+                      id="contact-name"
                       type="text"
                       placeholder="Jane Smith"
                       value={formValues.name}
                       onChange={handleChange("name")}
-                      aria-invalid={errors.name}
+                      autoComplete="name"
+                      required
+                      aria-invalid={Boolean(errors.name)}
+                      aria-describedby={errors.name ? "contact-name-error" : undefined}
                       className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
                         errors.name ? "border-red-500" : "border-transparent"
                       }`}
                     />
+                    {errors.name && (
+                      <p id="contact-name-error" className="mt-2 text-xs text-red-600">
+                        {errors.name}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="font-display text-xs font-normal uppercase tracking-[0.18em] text-[color:var(--beat-ink-soft)]">
                       Email*
                     </label>
                     <input
+                      id="contact-email"
                       type="email"
                       placeholder="jane@framer.com"
                       value={formValues.email}
                       onChange={handleChange("email")}
-                      aria-invalid={errors.email}
+                      autoComplete="email"
+                      inputMode="email"
+                      required
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={errors.email ? "contact-email-error" : undefined}
                       className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
                         errors.email ? "border-red-500" : "border-transparent"
                       }`}
                     />
+                    {errors.email && (
+                      <p id="contact-email-error" className="mt-2 text-xs text-red-600">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="font-display text-xs font-normal uppercase tracking-[0.18em] text-[color:var(--beat-ink-soft)]">
                       Message*
                     </label>
                     <textarea
+                      id="contact-message"
                       rows={5}
                       placeholder="Tell us about a bug, suggest a feature, or tell us about your day..."
                       value={formValues.message}
                       onChange={handleChange("message")}
-                      aria-invalid={errors.message}
+                      required
+                      aria-invalid={Boolean(errors.message)}
+                      aria-describedby={errors.message ? "contact-message-error" : undefined}
                       className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-3 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
                         errors.message ? "border-red-500" : "border-transparent"
                       }`}
                     />
+                    {errors.message && (
+                      <p id="contact-message-error" className="mt-2 text-xs text-red-600">
+                        {errors.message}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="submit"
-                    className="w-full rounded-full bg-[color:var(--beat-purple)] py-3 text-sm font-semibold text-white shadow-inner shadow-black/20 transition duration-200 ease-out hover:-translate-y-0.5 hover:opacity-95 hover:shadow-[0_10px_20px_rgba(108,81,214,0.35)] active:translate-y-0 active:scale-[0.99]"
+                    disabled={formStatus.state === "submitting"}
+                    ref={submitButtonRef}
+                    className="w-full rounded-full bg-[color:var(--beat-purple)] py-3 text-sm font-semibold text-white shadow-inner shadow-black/20 transition duration-200 ease-out hover:-translate-y-0.5 hover:opacity-95 hover:shadow-[0_10px_20px_rgba(108,81,214,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none active:translate-y-0 active:scale-[0.99]"
                   >
-                    Submit
+                    {formStatus.state === "submitting" ? "Sending..." : "Submit"}
                   </button>
+                  {formStatus.message && (
+                    <p
+                      className={`text-sm ${
+                        formStatus.state === "success"
+                          ? "text-green-600"
+                          : formStatus.state === "error"
+                            ? "text-red-600"
+                            : "text-[color:var(--beat-ink-soft)]"
+                      }`}
+                      aria-live="polite"
+                    >
+                      {formStatus.message}
+                    </p>
+                  )}
                 </form>
               </div>
             </section>

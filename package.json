@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.29.2",
     "next": "16.1.6",
+    "nodemailer": "^8.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

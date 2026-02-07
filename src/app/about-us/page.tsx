@@ -157,7 +157,7 @@ export default function AboutUsPage() {
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 className="overflow-hidden px-6 pb-4 md:hidden"
               >
-                <div className="rounded-2xl bg-white/95 p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
+                <div className="rounded-2xl bg-white p-3 text-sm font-semibold text-[color:var(--beat-purple)] shadow-lg shadow-black/20 backdrop-blur">
                 <Link
                   className="block rounded-xl px-3 py-2 transition hover:bg-[color:var(--beat-purple)]/10"
                   href="/"
