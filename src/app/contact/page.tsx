@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DownloadIcon from "@/components/DownloadIcon";
-import confetti from "canvas-confetti";
 
 const APP_STORE_URL = "https://www.apple.com/app-store/";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+const CONFETTI_COLORS = ["#FDE047", "#FDBA74", "#F472B6", "#60A5FA", "#A78BFA", "#34D399"];
 
 type FormValues = {
   name: string;
@@ -17,6 +17,17 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
+
+type ConfettiPiece = {
+  id: string;
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  rotation: number;
+  color: string;
+  delay: number;
+};
 
 export default function ContactPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -30,6 +41,9 @@ export default function ContactPage() {
     state: "idle" | "submitting" | "success" | "error";
     message: string;
   }>({ state: "idle", message: "" });
+  const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+  const confettiTimeoutRef = useRef<number | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const isValidEmail = (value: string) => EMAIL_REGEX.test(value.trim());
@@ -59,21 +73,35 @@ export default function ContactPage() {
   };
 
   const triggerConfetti = () => {
+    const form = formRef.current;
     const button = submitButtonRef.current;
-    if (!button) {
-      confetti({ particleCount: 80, spread: 60, startVelocity: 22, origin: { y: 0.7 } });
+    if (!form || !button) {
       return;
     }
-    const rect = button.getBoundingClientRect();
-    const x = (rect.left + rect.width / 2) / window.innerWidth;
-    const y = (rect.top + rect.height / 2) / window.innerHeight;
-    confetti({
-      particleCount: 80,
-      spread: 60,
-      startVelocity: 22,
-      scalar: 0.9,
-      origin: { x, y },
-    });
+
+    const formRect = form.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    const originX = buttonRect.left - formRect.left + buttonRect.width / 2;
+    const originY = buttonRect.top - formRect.top + buttonRect.height / 2;
+
+    const pieces = Array.from({ length: 22 }, (_, index) => ({
+      id: `${Date.now()}-${index}`,
+      x: originX,
+      y: originY,
+      dx: Math.round((Math.random() - 0.5) * 200),
+      dy: Math.round(140 + Math.random() * 120),
+      rotation: Math.round((Math.random() - 0.5) * 360),
+      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+      delay: Math.round(Math.random() * 120),
+    }));
+
+    if (confettiTimeoutRef.current) {
+      window.clearTimeout(confettiTimeoutRef.current);
+    }
+    setConfettiPieces(pieces);
+    confettiTimeoutRef.current = window.setTimeout(() => {
+      setConfettiPieces([]);
+    }, 1100);
   };
 
   const handleChange =
@@ -324,9 +352,29 @@ export default function ContactPage() {
                 </div>
 
                 <form
-                  className="space-y-5 px-10 py-10 text-sm md:px-12 md:py-12"
+                  ref={formRef}
+                  className="relative space-y-5 px-10 py-10 text-sm md:px-12 md:py-12"
                   onSubmit={handleSubmit}
                 >
+                  <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    {confettiPieces.map((piece) => (
+                      <span
+                        key={piece.id}
+                        className="confetti-piece"
+                        style={
+                          {
+                            left: piece.x,
+                            top: piece.y,
+                            backgroundColor: piece.color,
+                            animationDelay: `${piece.delay}ms`,
+                            ["--dx" as string]: `${piece.dx}px`,
+                            ["--dy" as string]: `${piece.dy}px`,
+                            ["--rot" as string]: `${piece.rotation}deg`,
+                          } as React.CSSProperties
+                        }
+                      />
+                    ))}
+                  </div>
                   <div>
                     <label className="font-display text-xs font-normal uppercase tracking-[0.18em] text-[color:var(--beat-ink-soft)]">
                       Name*
@@ -421,6 +469,28 @@ export default function ContactPage() {
                       {formStatus.message}
                     </p>
                   )}
+                  <style jsx>{`
+                    .confetti-piece {
+                      position: absolute;
+                      width: 6px;
+                      height: 10px;
+                      border-radius: 2px;
+                      opacity: 0;
+                      animation: confetti-pop 900ms ease-out forwards;
+                      transform: translate(0, 0) rotate(0deg);
+                    }
+
+                    @keyframes confetti-pop {
+                      0% {
+                        opacity: 1;
+                        transform: translate(0, 0) rotate(0deg);
+                      }
+                      100% {
+                        opacity: 0;
+                        transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+                      }
+                    }
+                  `}</style>
                 </form>
               </div>
             </section>
