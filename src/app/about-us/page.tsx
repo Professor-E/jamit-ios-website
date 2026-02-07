@@ -30,7 +30,7 @@ const teamMembers = [
     photo: "/assets/Dom.png",
     photoPosition: "-10% 0%",
     photoScale: 1.15,
-    photoShiftY: -2,
+    photoShiftY: -1.99,
     links: {
       github: "https://github.com/Professor-E",
       linkedin: "https://www.linkedin.com/in/dominik-grzeszczak-184982285/",
