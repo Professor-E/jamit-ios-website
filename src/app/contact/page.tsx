@@ -150,7 +150,12 @@ export default function ContactPage() {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(result?.error || "Unable to send your message right now.");
+        const friendlyMessage =
+          response.status >= 500
+            ? "We couldn't send your message right now. Please try again or email help@jamit-ios.com."
+            : result?.error || "Please check your info and try again.";
+        setFormStatus({ state: "error", message: friendlyMessage });
+        return;
       }
 
       setFormValues({ name: "", email: "", message: "" });
@@ -162,9 +167,9 @@ export default function ContactPage() {
       triggerConfetti();
     } catch (error) {
       const message =
-        error instanceof Error
+        error instanceof Error && error.message
           ? error.message
-          : "Unable to send your message right now.";
+          : "We couldn't send your message right now. Please try again or email help@jamit-ios.com.";
       setFormStatus({ state: "error", message });
     }
   };

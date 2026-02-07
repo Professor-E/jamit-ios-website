@@ -71,15 +71,30 @@ export async function POST(request: Request) {
   const port = Number(process.env.SMTP_PORT ?? "587");
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  const createTransporter = (options: { port: number; secure: boolean }) =>
+    nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: options.port,
+      secure: options.secure,
+      requireTLS: !options.secure,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+  const shouldRetryInsecure = (error: unknown) => {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("wrong version number") ||
+      message.includes("ssl routines") ||
+      message.includes("ssl3_get_record") ||
+      message.includes("tls")
+    );
+  };
 
   const fromAddress = process.env.MAIL_FROM ?? "Jam It Contact <no-reply@jamit-ios.com>";
   const toAddress = process.env.MAIL_TO ?? "help@jamit-ios.com";
@@ -101,19 +116,38 @@ export async function POST(request: Request) {
     <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
   `;
 
+  const mailOptions = {
+    from: fromAddress,
+    to: toAddress,
+    replyTo: `${safeName} <${safeEmail}>`,
+    subject,
+    text: textBody,
+    html: htmlBody,
+  };
+
   try {
-    await transporter.sendMail({
-      from: fromAddress,
-      to: toAddress,
-      replyTo: `${safeName} <${safeEmail}>`,
-      subject,
-      text: textBody,
-      html: htmlBody,
-    });
+    const transporter = createTransporter({ port, secure });
+    await transporter.sendMail(mailOptions);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to send your message.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (secure && shouldRetryInsecure(error)) {
+      try {
+        const fallbackPort = port === 465 ? 587 : port;
+        const fallbackTransporter = createTransporter({
+          port: fallbackPort,
+          secure: false,
+        });
+        await fallbackTransporter.sendMail(mailOptions);
+        return NextResponse.json({ ok: true });
+      } catch (fallbackError) {
+        console.error("SMTP fallback failed:", fallbackError);
+      }
+    } else {
+      console.error("SMTP send failed:", error);
+    }
+    return NextResponse.json(
+      { error: "Unable to send your message right now." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true });
