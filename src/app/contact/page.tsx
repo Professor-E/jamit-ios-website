@@ -27,6 +27,8 @@ type ConfettiPiece = {
   rotation: number;
   color: string;
   delay: number;
+  size: number;
+  duration: number;
 };
 
 export default function ContactPage() {
@@ -42,7 +44,9 @@ export default function ContactPage() {
     message: string;
   }>({ state: "idle", message: "" });
   const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+  const [screenConfettiPieces, setScreenConfettiPieces] = useState<ConfettiPiece[]>([]);
   const confettiTimeoutRef = useRef<number | null>(null);
+  const screenConfettiTimeoutRef = useRef<number | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -73,6 +77,9 @@ export default function ContactPage() {
   };
 
   const triggerConfetti = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
     const form = formRef.current;
     const button = submitButtonRef.current;
     if (!form || !button) {
@@ -82,17 +89,19 @@ export default function ContactPage() {
     const formRect = form.getBoundingClientRect();
     const buttonRect = button.getBoundingClientRect();
     const originX = buttonRect.left - formRect.left + buttonRect.width / 2;
-    const originY = buttonRect.top - formRect.top + buttonRect.height / 2;
+    const originY = buttonRect.top - formRect.top + 4;
 
-    const pieces = Array.from({ length: 22 }, (_, index) => ({
-      id: `${Date.now()}-${index}`,
+    const pieces = Array.from({ length: 24 }, (_, index) => ({
+      id: `${Date.now()}-burst-${index}`,
       x: originX,
       y: originY,
       dx: Math.round((Math.random() - 0.5) * 200),
-      dy: Math.round(140 + Math.random() * 120),
+      dy: Math.round(120 + Math.random() * 120),
       rotation: Math.round((Math.random() - 0.5) * 360),
       color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
       delay: Math.round(Math.random() * 120),
+      size: 6 + Math.random() * 4,
+      duration: 800 + Math.random() * 250,
     }));
 
     if (confettiTimeoutRef.current) {
@@ -102,6 +111,29 @@ export default function ContactPage() {
     confettiTimeoutRef.current = window.setTimeout(() => {
       setConfettiPieces([]);
     }, 1100);
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const screenPieces = Array.from({ length: 90 }, (_, index) => ({
+      id: `${Date.now()}-screen-${index}`,
+      x: Math.random() * screenWidth,
+      y: -40 - Math.random() * 80,
+      dx: Math.round((Math.random() - 0.5) * 120),
+      dy: Math.round(screenHeight + 200 + Math.random() * 200),
+      rotation: Math.round((Math.random() - 0.5) * 720),
+      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+      delay: Math.round(Math.random() * 280),
+      size: 6 + Math.random() * 6,
+      duration: 1600 + Math.random() * 800,
+    }));
+
+    if (screenConfettiTimeoutRef.current) {
+      window.clearTimeout(screenConfettiTimeoutRef.current);
+    }
+    setScreenConfettiPieces(screenPieces);
+    screenConfettiTimeoutRef.current = window.setTimeout(() => {
+      setScreenConfettiPieces([]);
+    }, 2600);
   };
 
   const handleChange =
@@ -178,6 +210,30 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[color:var(--beat-cream)] text-[color:var(--beat-ink)]">
+      {screenConfettiPieces.length > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+          {screenConfettiPieces.map((piece) => (
+            <span
+              key={piece.id}
+              className="confetti-piece confetti-shower"
+              style={
+                {
+                  left: piece.x,
+                  top: piece.y,
+                  width: `${piece.size}px`,
+                  height: `${piece.size * 1.6}px`,
+                  backgroundColor: piece.color,
+                  animationDelay: `${piece.delay}ms`,
+                  ["--dx" as string]: `${piece.dx}px`,
+                  ["--dy" as string]: `${piece.dy}px`,
+                  ["--rot" as string]: `${piece.rotation}deg`,
+                  ["--dur" as string]: `${piece.duration}ms`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
       <div className="flex min-h-screen flex-col">
         <div className="bg-[color:var(--beat-purple)]">
           <header className="relative z-10 flex w-full items-center justify-between px-6 pb-4 pt-5 md:px-12 lg:px-16">
@@ -365,16 +421,19 @@ export default function ContactPage() {
                     {confettiPieces.map((piece) => (
                       <span
                         key={piece.id}
-                        className="confetti-piece"
+                        className="confetti-piece confetti-burst"
                         style={
                           {
                             left: piece.x,
                             top: piece.y,
+                            width: `${piece.size}px`,
+                            height: `${piece.size * 1.6}px`,
                             backgroundColor: piece.color,
                             animationDelay: `${piece.delay}ms`,
                             ["--dx" as string]: `${piece.dx}px`,
                             ["--dy" as string]: `${piece.dy}px`,
                             ["--rot" as string]: `${piece.rotation}deg`,
+                            ["--dur" as string]: `${piece.duration}ms`,
                           } as React.CSSProperties
                         }
                       />
@@ -477,18 +536,37 @@ export default function ContactPage() {
                   <style jsx>{`
                     .confetti-piece {
                       position: absolute;
-                      width: 6px;
-                      height: 10px;
                       border-radius: 2px;
                       opacity: 0;
-                      animation: confetti-pop 900ms ease-out forwards;
                       transform: translate(0, 0) rotate(0deg);
                     }
 
-                    @keyframes confetti-pop {
+                    .confetti-burst {
+                      animation: confetti-burst var(--dur, 900ms) ease-out forwards;
+                    }
+
+                    .confetti-shower {
+                      animation: confetti-shower var(--dur, 1800ms) ease-out forwards;
+                    }
+
+                    @keyframes confetti-burst {
                       0% {
                         opacity: 1;
                         transform: translate(0, 0) rotate(0deg);
+                      }
+                      100% {
+                        opacity: 0;
+                        transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+                      }
+                    }
+
+                    @keyframes confetti-shower {
+                      0% {
+                        opacity: 0;
+                        transform: translate(0, 0) rotate(0deg);
+                      }
+                      15% {
+                        opacity: 1;
                       }
                       100% {
                         opacity: 0;
