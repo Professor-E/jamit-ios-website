@@ -24,6 +24,8 @@ type ConfettiPiece = {
   y: number;
   dx: number;
   dy: number;
+  upX: number;
+  upY: number;
   rotation: number;
   color: string;
   delay: number;
@@ -89,19 +91,21 @@ export default function ContactPage() {
     const formRect = form.getBoundingClientRect();
     const buttonRect = button.getBoundingClientRect();
     const originX = buttonRect.left - formRect.left + buttonRect.width / 2;
-    const originY = buttonRect.top - formRect.top + 4;
+    const originY = buttonRect.top - formRect.top + buttonRect.height / 2;
 
     const pieces = Array.from({ length: 24 }, (_, index) => ({
       id: `${Date.now()}-burst-${index}`,
       x: originX,
       y: originY,
-      dx: Math.round((Math.random() - 0.5) * 200),
-      dy: Math.round(120 + Math.random() * 120),
+      upX: Math.round((Math.random() - 0.5) * 30),
+      upY: Math.round(-90 - Math.random() * 60),
+      dx: Math.round((Math.random() - 0.5) * 260),
+      dy: Math.round(60 + Math.random() * 140),
       rotation: Math.round((Math.random() - 0.5) * 360),
       color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
       delay: Math.round(Math.random() * 120),
       size: 6 + Math.random() * 4,
-      duration: 800 + Math.random() * 250,
+      duration: 1000 + Math.random() * 350,
     }));
 
     if (confettiTimeoutRef.current) {
@@ -118,6 +122,8 @@ export default function ContactPage() {
       id: `${Date.now()}-screen-${index}`,
       x: Math.random() * screenWidth,
       y: -40 - Math.random() * 80,
+      upX: 0,
+      upY: 0,
       dx: Math.round((Math.random() - 0.5) * 120),
       dy: Math.round(screenHeight + 200 + Math.random() * 200),
       rotation: Math.round((Math.random() - 0.5) * 720),
@@ -430,6 +436,8 @@ export default function ContactPage() {
                             height: `${piece.size * 1.6}px`,
                             backgroundColor: piece.color,
                             animationDelay: `${piece.delay}ms`,
+                            ["--upx" as string]: `${piece.upX}px`,
+                            ["--upy" as string]: `${piece.upY}px`,
                             ["--dx" as string]: `${piece.dx}px`,
                             ["--dy" as string]: `${piece.dy}px`,
                             ["--rot" as string]: `${piece.rotation}deg`,
@@ -446,14 +454,14 @@ export default function ContactPage() {
                     <input
                       id="contact-name"
                       type="text"
-                      placeholder="Jane Smith"
+                      placeholder="John Doe"
                       value={formValues.name}
                       onChange={handleChange("name")}
                       autoComplete="name"
                       required
                       aria-invalid={Boolean(errors.name)}
                       aria-describedby={errors.name ? "contact-name-error" : undefined}
-                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
+                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#7A7A7A] focus:outline-none ${
                         errors.name ? "border-red-500" : "border-transparent"
                       }`}
                     />
@@ -470,7 +478,7 @@ export default function ContactPage() {
                     <input
                       id="contact-email"
                       type="email"
-                      placeholder="jane@framer.com"
+                      placeholder="john.doe@email.com"
                       value={formValues.email}
                       onChange={handleChange("email")}
                       autoComplete="email"
@@ -478,7 +486,7 @@ export default function ContactPage() {
                       required
                       aria-invalid={Boolean(errors.email)}
                       aria-describedby={errors.email ? "contact-email-error" : undefined}
-                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
+                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-2.5 text-sm text-[#2D2D2D] placeholder:text-[#7A7A7A] focus:outline-none ${
                         errors.email ? "border-red-500" : "border-transparent"
                       }`}
                     />
@@ -501,7 +509,7 @@ export default function ContactPage() {
                       required
                       aria-invalid={Boolean(errors.message)}
                       aria-describedby={errors.message ? "contact-message-error" : undefined}
-                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-3 text-sm text-[#2D2D2D] placeholder:text-[#3A3A3A] focus:outline-none ${
+                      className={`mt-2 w-full rounded-md border bg-[#CACACA] px-4 py-3 text-sm text-[#2D2D2D] placeholder:text-[#7A7A7A] focus:outline-none ${
                         errors.message ? "border-red-500" : "border-transparent"
                       }`}
                     />
@@ -553,6 +561,10 @@ export default function ContactPage() {
                       0% {
                         opacity: 1;
                         transform: translate(0, 0) rotate(0deg);
+                      }
+                      45% {
+                        opacity: 1;
+                        transform: translate(var(--upx), var(--upy)) rotate(var(--rot));
                       }
                       100% {
                         opacity: 0;
