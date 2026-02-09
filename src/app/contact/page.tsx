@@ -508,42 +508,6 @@ export default function ContactPage() {
                       {formStatus.message}
                     </p>
                   )}
-                  <style jsx>{`
-                    .confetti-piece {
-                      position: absolute;
-                      border-radius: 2px;
-                      opacity: 0;
-                      transform: translate(0, 0) rotate(0deg);
-                    }
-
-                    .confetti-cannon {
-                      animation: confetti-cannon var(--dur, 2200ms)
-                        cubic-bezier(0.22, 0.72, 0.32, 1) forwards;
-                    }
-
-                    @keyframes confetti-cannon {
-                      0% {
-                        opacity: 0;
-                        transform: translate(0, 0) rotate(0deg);
-                      }
-                      8% {
-                        opacity: 1;
-                      }
-                      58% {
-                        opacity: 1;
-                        transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
-                      }
-                      62% {
-                        opacity: 1;
-                        transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
-                      }
-                      100% {
-                        opacity: 0.85;
-                        transform: translate(var(--fall-x), var(--fall-y))
-                          rotate(calc(var(--rot) + var(--spin)));
-                      }
-                    }
-                  `}</style>
                 </form>
               </div>
             </section>
@@ -571,6 +535,42 @@ export default function ContactPage() {
           </p>
         </div>
       </footer>
+      <style jsx global>{`
+        .confetti-piece {
+          position: absolute;
+          border-radius: 2px;
+          opacity: 0;
+          transform: translate(0, 0) rotate(0deg);
+        }
+
+        .confetti-cannon {
+          animation: confetti-cannon var(--dur, 2200ms)
+            cubic-bezier(0.22, 0.72, 0.32, 1) forwards;
+        }
+
+        @keyframes confetti-cannon {
+          0% {
+            opacity: 0;
+            transform: translate(0, 0) rotate(0deg);
+          }
+          8% {
+            opacity: 1;
+          }
+          58% {
+            opacity: 1;
+            transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
+          }
+          62% {
+            opacity: 1;
+            transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
+          }
+          100% {
+            opacity: 0.85;
+            transform: translate(var(--fall-x), var(--fall-y))
+              rotate(calc(var(--rot) + var(--spin)));
+          }
+        }
+      `}</style>
     </div>
   );
 }
