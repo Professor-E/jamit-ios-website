@@ -93,8 +93,9 @@ export default function ContactPage() {
     const originY = buttonRect.top + buttonRect.height / 2;
 
     const pieceCount = 28;
+    const spreadDenominator = Math.max(1, pieceCount - 1);
     const pieces = Array.from({ length: pieceCount }, (_, index) => {
-      const spreadRatio = pieceCount === 1 ? 0.5 : index / (pieceCount - 1);
+      const spreadRatio = index / spreadDenominator;
       const targetX = formRect.left + spreadRatio * formRect.width + (Math.random() - 0.5) * 14;
       const apexX = targetX - originX;
       const apexY = formRect.top - originY;
