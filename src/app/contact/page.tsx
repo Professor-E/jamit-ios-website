@@ -114,7 +114,7 @@ export default function ContactPage() {
         color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
         delay: Math.round(Math.random() * 120),
         size: 6 + Math.random() * 4,
-        duration: 2000 + Math.random() * 700,
+        duration: 1500 + Math.random() * 500,
       };
     });
 
@@ -421,7 +421,7 @@ export default function ContactPage() {
                     <input
                       id="contact-name"
                       type="text"
-                      placeholder="John D."
+                      placeholder="John Doe"
                       value={formValues.name}
                       onChange={handleChange("name")}
                       autoComplete="name"
@@ -544,7 +544,7 @@ export default function ContactPage() {
         }
 
         .confetti-cannon {
-          animation: confetti-cannon var(--dur, 2200ms)
+          animation: confetti-cannon var(--dur, 1800ms)
             cubic-bezier(0.22, 0.72, 0.32, 1) forwards;
         }
 
@@ -556,11 +556,7 @@ export default function ContactPage() {
           8% {
             opacity: 1;
           }
-          58% {
-            opacity: 1;
-            transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
-          }
-          62% {
+          60% {
             opacity: 1;
             transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
           }
