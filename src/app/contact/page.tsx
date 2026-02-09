@@ -22,11 +22,12 @@ type ConfettiPiece = {
   id: string;
   x: number;
   y: number;
-  dx: number;
-  dy: number;
-  upX: number;
-  upY: number;
+  apexX: number;
+  apexY: number;
+  fallX: number;
+  fallY: number;
   rotation: number;
+  spin: number;
   color: string;
   delay: number;
   size: number;
@@ -46,9 +47,7 @@ export default function ContactPage() {
     message: string;
   }>({ state: "idle", message: "" });
   const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
-  const [screenConfettiPieces, setScreenConfettiPieces] = useState<ConfettiPiece[]>([]);
   const confettiTimeoutRef = useRef<number | null>(null);
-  const screenConfettiTimeoutRef = useRef<number | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -90,56 +89,43 @@ export default function ContactPage() {
 
     const formRect = form.getBoundingClientRect();
     const buttonRect = button.getBoundingClientRect();
-    const originX = buttonRect.left - formRect.left + buttonRect.width / 2;
-    const originY = buttonRect.top - formRect.top + buttonRect.height / 2;
+    const originX = buttonRect.left + buttonRect.width / 2;
+    const originY = buttonRect.top + buttonRect.height / 2;
 
-    const pieces = Array.from({ length: 24 }, (_, index) => ({
-      id: `${Date.now()}-burst-${index}`,
-      x: originX,
-      y: originY,
-      upX: Math.round((Math.random() - 0.5) * 30),
-      upY: Math.round(-90 - Math.random() * 60),
-      dx: Math.round((Math.random() - 0.5) * 260),
-      dy: Math.round(60 + Math.random() * 140),
-      rotation: Math.round((Math.random() - 0.5) * 360),
-      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
-      delay: Math.round(Math.random() * 120),
-      size: 6 + Math.random() * 4,
-      duration: 1000 + Math.random() * 350,
-    }));
+    const pieceCount = 28;
+    const pieces = Array.from({ length: pieceCount }, (_, index) => {
+      const spreadRatio = pieceCount === 1 ? 0.5 : index / (pieceCount - 1);
+      const targetX = formRect.left + spreadRatio * formRect.width + (Math.random() - 0.5) * 14;
+      const apexX = targetX - originX;
+      const apexY = formRect.top - originY;
+      const fallY = window.innerHeight - originY + 220 + Math.random() * 140;
+      const fallX = apexX + (Math.random() - 0.5) * 180;
+      return {
+        id: `${Date.now()}-burst-${index}`,
+        x: originX,
+        y: originY,
+        apexX: Math.round(apexX),
+        apexY: Math.round(apexY),
+        fallX: Math.round(fallX),
+        fallY: Math.round(fallY),
+        rotation: Math.round((Math.random() - 0.5) * 220),
+        spin: Math.round(360 + Math.random() * 540),
+        color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+        delay: Math.round(Math.random() * 120),
+        size: 6 + Math.random() * 4,
+        duration: 2000 + Math.random() * 700,
+      };
+    });
 
     if (confettiTimeoutRef.current) {
       window.clearTimeout(confettiTimeoutRef.current);
     }
     setConfettiPieces(pieces);
+    const maxDuration = Math.max(...pieces.map((piece) => piece.duration));
+    const maxDelay = Math.max(...pieces.map((piece) => piece.delay));
     confettiTimeoutRef.current = window.setTimeout(() => {
       setConfettiPieces([]);
-    }, 1100);
-
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const screenPieces = Array.from({ length: 90 }, (_, index) => ({
-      id: `${Date.now()}-screen-${index}`,
-      x: Math.random() * screenWidth,
-      y: -40 - Math.random() * 80,
-      upX: 0,
-      upY: 0,
-      dx: Math.round((Math.random() - 0.5) * 120),
-      dy: Math.round(screenHeight + 200 + Math.random() * 200),
-      rotation: Math.round((Math.random() - 0.5) * 720),
-      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
-      delay: Math.round(Math.random() * 280),
-      size: 6 + Math.random() * 6,
-      duration: 1600 + Math.random() * 800,
-    }));
-
-    if (screenConfettiTimeoutRef.current) {
-      window.clearTimeout(screenConfettiTimeoutRef.current);
-    }
-    setScreenConfettiPieces(screenPieces);
-    screenConfettiTimeoutRef.current = window.setTimeout(() => {
-      setScreenConfettiPieces([]);
-    }, 2600);
+    }, maxDuration + maxDelay + 240);
   };
 
   const handleChange =
@@ -154,8 +140,9 @@ export default function ContactPage() {
         const nextError = validateField(field, value);
         setErrors((prev) => {
           if (!nextError) {
-            const { [field]: _, ...rest } = prev;
-            return rest;
+            const nextErrors = { ...prev };
+            delete nextErrors[field];
+            return nextErrors;
           }
           return { ...prev, [field]: nextError };
         });
@@ -216,12 +203,12 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[color:var(--beat-cream)] text-[color:var(--beat-ink)]">
-      {screenConfettiPieces.length > 0 && (
+      {confettiPieces.length > 0 && (
         <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-          {screenConfettiPieces.map((piece) => (
+          {confettiPieces.map((piece) => (
             <span
               key={piece.id}
-              className="confetti-piece confetti-shower"
+              className="confetti-piece confetti-cannon"
               style={
                 {
                   left: piece.x,
@@ -230,9 +217,12 @@ export default function ContactPage() {
                   height: `${piece.size * 1.6}px`,
                   backgroundColor: piece.color,
                   animationDelay: `${piece.delay}ms`,
-                  ["--dx" as string]: `${piece.dx}px`,
-                  ["--dy" as string]: `${piece.dy}px`,
+                  ["--apex-x" as string]: `${piece.apexX}px`,
+                  ["--apex-y" as string]: `${piece.apexY}px`,
+                  ["--fall-x" as string]: `${piece.fallX}px`,
+                  ["--fall-y" as string]: `${piece.fallY}px`,
                   ["--rot" as string]: `${piece.rotation}deg`,
+                  ["--spin" as string]: `${piece.spin}deg`,
                   ["--dur" as string]: `${piece.duration}ms`,
                 } as React.CSSProperties
               }
@@ -423,30 +413,6 @@ export default function ContactPage() {
                   className="relative space-y-5 px-10 py-10 text-sm md:px-12 md:py-12"
                   onSubmit={handleSubmit}
                 >
-                  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    {confettiPieces.map((piece) => (
-                      <span
-                        key={piece.id}
-                        className="confetti-piece confetti-burst"
-                        style={
-                          {
-                            left: piece.x,
-                            top: piece.y,
-                            width: `${piece.size}px`,
-                            height: `${piece.size * 1.6}px`,
-                            backgroundColor: piece.color,
-                            animationDelay: `${piece.delay}ms`,
-                            ["--upx" as string]: `${piece.upX}px`,
-                            ["--upy" as string]: `${piece.upY}px`,
-                            ["--dx" as string]: `${piece.dx}px`,
-                            ["--dy" as string]: `${piece.dy}px`,
-                            ["--rot" as string]: `${piece.rotation}deg`,
-                            ["--dur" as string]: `${piece.duration}ms`,
-                          } as React.CSSProperties
-                        }
-                      />
-                    ))}
-                  </div>
                   <div>
                     <label className="font-display text-xs font-normal uppercase tracking-[0.18em] text-[color:var(--beat-ink-soft)]">
                       Name*
@@ -549,40 +515,31 @@ export default function ContactPage() {
                       transform: translate(0, 0) rotate(0deg);
                     }
 
-                    .confetti-burst {
-                      animation: confetti-burst var(--dur, 900ms) ease-out forwards;
+                    .confetti-cannon {
+                      animation: confetti-cannon var(--dur, 2200ms)
+                        cubic-bezier(0.22, 0.72, 0.32, 1) forwards;
                     }
 
-                    .confetti-shower {
-                      animation: confetti-shower var(--dur, 1800ms) ease-out forwards;
-                    }
-
-                    @keyframes confetti-burst {
-                      0% {
-                        opacity: 1;
-                        transform: translate(0, 0) rotate(0deg);
-                      }
-                      45% {
-                        opacity: 1;
-                        transform: translate(var(--upx), var(--upy)) rotate(var(--rot));
-                      }
-                      100% {
-                        opacity: 0;
-                        transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
-                      }
-                    }
-
-                    @keyframes confetti-shower {
+                    @keyframes confetti-cannon {
                       0% {
                         opacity: 0;
                         transform: translate(0, 0) rotate(0deg);
                       }
-                      15% {
+                      8% {
                         opacity: 1;
                       }
+                      58% {
+                        opacity: 1;
+                        transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
+                      }
+                      62% {
+                        opacity: 1;
+                        transform: translate(var(--apex-x), var(--apex-y)) rotate(var(--rot));
+                      }
                       100% {
-                        opacity: 0;
-                        transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+                        opacity: 0.85;
+                        transform: translate(var(--fall-x), var(--fall-y))
+                          rotate(calc(var(--rot) + var(--spin)));
                       }
                     }
                   `}</style>
