@@ -421,7 +421,7 @@ export default function ContactPage() {
                     <input
                       id="contact-name"
                       type="text"
-                      placeholder="John Do"
+                      placeholder="John Doe"
                       value={formValues.name}
                       onChange={handleChange("name")}
                       autoComplete="name"
