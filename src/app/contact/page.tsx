@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DownloadIcon from "@/components/DownloadIcon";
 
-const APP_STORE_URL = "https://www.apple.com/app-store/";
+const APP_STORE_URL = "https://apps.apple.com/us/app/jam-it/id6758369950";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 const CONFETTI_COLORS = ["#FDE047", "#FDBA74", "#F472B6", "#60A5FA", "#A78BFA", "#34D399"];
 

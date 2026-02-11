@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DownloadIcon from "@/components/DownloadIcon";
 
-const APP_STORE_URL = "https://www.apple.com/app-store/";
+const APP_STORE_URL = "https://apps.apple.com/us/app/jam-it/id6758369950";
 
 const teamMembers = [
   {
