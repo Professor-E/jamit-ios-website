@@ -78,7 +78,7 @@ const featureBlocks = [
   },
 ];
 
-const APP_STORE_URL = "https://www.apple.com/app-store/";
+const APP_STORE_URL = "https://apps.apple.com/us/app/jam-it/id6758369950";
 const HERO_WORDS = [
   { text: "speed", color: "#1EE604" },
   { text: "race", color: "#FF9F43" },
